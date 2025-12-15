@@ -1,9 +1,12 @@
 version: "3.9"
 
 services:
-  trocr:
+  trocr_api:
     build: .
-    container_name: trocr_ocr
+    container_name: trocr_api
+    ports:
+      - "8000:8000"
     volumes:
       - .:/app
-    command: python main.py
+    restart: unless-stopped
+M8Y#TDAqc\6wL<c£ML66d80bw
