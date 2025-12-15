@@ -1,9 +1,10 @@
-from fastapi import FastAPI, UploadFile, BackgroundTasks, HTTPException
+from fastapi import FastAPI, UploadFile, BackgroundTasks, HTTPException, Form, File
 from pathlib import Path
-import uuidfrom pdf_extractor import extract_target_page
+import uuid
+import json
+from pdf_extractor import extract_target_page
 
-
-from app.worker import process_pdf_job
+from worker import process_pdf_job
 
 app = FastAPI()
 
@@ -15,8 +16,10 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 @app.post("/upload-pdf")
 async def upload_pdf(
     file: UploadFile,
-    background_tasks: BackgroundTasks,
-    phrase: str = Form(...)
+    phrase: str = Form(...),
+    # default argument
+    background_tasks: BackgroundTasks = None,
+
 
 ):
     if not file.filename.endswith(".pdf"):

@@ -6,7 +6,4 @@ services:
     container_name: trocr_api
     ports:
       - "8000:8000"
-    volumes:
-      - .:/app
     restart: unless-stopped
-M8Y#TDAqc\6wL<c£ML66d80bw

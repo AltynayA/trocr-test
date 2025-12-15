@@ -1,10 +1,5 @@
 
-from pathlib import Path
 from pdf_extractor import extract_target_page
-
-
-
-
 
 from pathlib import Path
 import json

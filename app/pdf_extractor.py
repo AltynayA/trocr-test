@@ -6,14 +6,18 @@ import torch
 import json
 import re
 
-# loadinfg TrOCR
-processor = TrOCRProcessor.from_pretrained(
-    "microsoft/trocr-large-printed",
-    use_fast=False
-    #  true for fast 
-)
-model = VisionEncoderDecoderModel.from_pretrained("microsoft/trocr-large-printed")
-model.eval()
+
+# lazy model load (only after request)
+processor = None
+model = None
+
+def load_model():
+    global processor, model
+    if processor is None or model is None:
+        processor = TrOCRProcessor.from_pretrained("microsoft/trocr-large-printed", use_fast=False)
+        model = VisionEncoderDecoderModel.from_pretrained("microsoft/trocr-large-printed")
+        model.eval()
+    return processor, model
 
 # normalization layer
 def normalize(s: str) -> str:
@@ -21,7 +25,6 @@ def normalize(s: str) -> str:
     s = re.sub(r"[^a-zа-я0-9 ]", "", s)
     s = re.sub(r"\s+", " ", s)
     return s.strip()
-
 
 # extracting text from a single image 
 def extract_text_from_image(image: Image.Image) -> str:
@@ -55,7 +58,8 @@ def extract_target_page(pdf_path: str, phrase: str, out_dir="train", dpi=300):
         image = Image.open(png_file).convert("RGB")
         full_text = extract_text_from_image(image)
         # Split into lines (approximate by sentence / periods)
-        lines = [line.strip() for line in full_text.split('.') if line.strip()]
+        lines = [l.strip() for l in full_text.split('\n') if l.strip()]
+        # lines = [line.strip() for line in full_text.split('.') if line.strip()]
         # Find line containing phrase
         for idx, line in enumerate(lines):
             if phrase_norm in normalize(line):
@@ -63,19 +67,5 @@ def extract_target_page(pdf_path: str, phrase: str, out_dir="train", dpi=300):
                 return png_file, lines[idx + 1 :]
     return None, []
 
-
-# if __name__ == "__main__":
-#     pdf = "data/train/sample2.pdf"
-#     phrase = "Accountability and transparency"
-
-#     target_png, lines_below = extract_target_page(pdf, phrase)
-
-#     if target_png:
-#         print("Target page:", target_png)
-#         print("Text below heading:")
-#         for line in lines_below:
-#             print("-", line)
-#     else:
-#         print("Page not found")
 
 
