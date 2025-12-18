@@ -2,12 +2,21 @@ from fastapi import FastAPI, UploadFile, BackgroundTasks, HTTPException, Form, F
 from pathlib import Path
 import uuid
 import json
+import time
 from concurrent.futures import ThreadPoolExecutor
 from pdf_extractor import extract_target_page
 
 from worker import process_pdf_job
 
 app = FastAPI()
+@app.middleware("http")
+async def timing_middleware(request: Request, call_next):
+    start = time.perf_counter()
+    response = await call_next(request)
+    duration = (time.perf_counter() - start) * 1000
+    response.headers["X-Process-Time-ms"] = f"{duration:.2f}"
+    print(f"{request.method} {request.url.path} took {duration:.2f} ms")
+    return response
 
 UPLOAD_DIR = Path("storage/uploads")
 RESULT_DIR = Path("storage/results")
@@ -58,6 +67,7 @@ async def upload_pdf(
 @app.get("/result/{job_id}")
 def get_result(job_id: str):
     result_file = RESULT_DIR / f"{job_id}.json"
+    
 
     if not result_file.exists():
         return {"status": "pending"}
