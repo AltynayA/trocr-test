@@ -9,10 +9,7 @@ RESULT_DIR = Path("storage/results")
 RESULT_DIR.mkdir(parents=True, exist_ok=True)
 
 def process_pdf_job(job_id: str, pdf_path: str, phrase: str):
-    """
-    Process a PDF, extract pages and text below a phrase,
-    and save structured JSON for frontend consumption.
-    """
+
     try:
         torch.set_num_threads(1)
 

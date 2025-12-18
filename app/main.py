@@ -23,6 +23,7 @@ def run_in_executor(job_id: str, pdf_path: str, phrase: str):
     executor.submit(process_pdf_job, job_id, pdf_path, phrase)
 # upload pdf
 @app.post("/upload-pdf")
+
 async def upload_pdf(
     file: UploadFile = File(...),
     phrase: str = Form(...),
