@@ -36,39 +36,30 @@ def pdf_to_images(pdf_path: str, out_dir="pages", dpi=150):
 # Extract target page and text below phrase
 def extract_target_page(pdf_path: str, phrase: str, out_dir="pages", dpi=150):
     phrase_norm = normalize(phrase)
+<<<<<<< HEAD
     # reader = easyocr.Reader(['ru, 'kz])
+=======
+>>>>>>> 2f0c3951e645b3df5c5c83faec8f330af8f86059
     png_files = pdf_to_images(pdf_path, out_dir, dpi)
-
-    results = []
 
     for png_file in png_files:
         with Image.open(png_file) as img:
-            img = img.convert("L")  # grayscale
+            img = img.convert("L")
             w, h = img.size
             if w > 1024:
                 img = img.resize((1024, int(h * 1024 / w)))
             img_np = np.array(img)
 
-    # OCR must happen INSIDE the with-block
-            text_chunks = reader.readtext(img_np, detail=0)
+            lines = reader.readtext(img_np, detail=0)
 
-        full_text = " ".join(
-            normalize(t) for t in text_chunks if t.strip()
-        )
+        norm_lines = [normalize(l) for l in lines if l.strip()]
 
-        # ---- Split at first occurrence ----
-        parts = full_text.split(phrase_norm, 1)
-        if len(parts) > 1:
-            text_below_phrase = parts[1].strip()
-            results.append({
-                "page": str(png_file),
-                "text_below_phrase": text_below_phrase
-            })
-            break  # ⬅ stop once phrase is found (major speedup)
-        else:
-            results.append({
-                "page": str(png_file),
-                "text_below_phrase": ""
-            })
+        for i, line in enumerate(norm_lines):
+            if phrase_norm in line:
+                return [{
+                    "page": str(png_file),
+                    "text_below_phrase": " ".join(norm_lines[i + 1:])
+                }]
 
-    return results
+    return []
+
